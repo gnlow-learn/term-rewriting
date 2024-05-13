@@ -33,7 +33,7 @@ const Clause = {
             }
         }
         for (let i=0; i<clauseStr.length; i++) {
-            if (/[a-zA-Z$]/.test(clauseStr[i])) {
+            if (/[a-zA-Z0-9$]/.test(clauseStr[i])) {
                 token += clauseStr[i]
                 continue
             } else if (clauseStr[i] == "(") {
@@ -138,6 +138,16 @@ class Rule {
             Clause.parse(from),
             Clause.parse(to),
         )
+    }
+}
+
+class Program {
+    rules
+    constructor(rules: Rule[]) {
+        this.rules = rules
+    }
+    query(query: Clause) {
+        
     }
 }
 
