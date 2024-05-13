@@ -1,6 +1,6 @@
-type Knowledge = Record<string, Clause>
+export type Knowledge = Record<string, Clause>
 
-const zip =
+export const zip =
 <T extends unknown[]>
 (...arrs: {[K in keyof T]: T[K][]}): T[] => {
     const result = []
@@ -14,14 +14,14 @@ const zip =
     return result
 }
 
-interface Clause {
+export interface Clause {
     data: Clause[]
     unify(target: Clause): false | Knowledge
     apply(knowledge: Knowledge): Clause
     toString(): string
 }
 
-const Clause = {
+export const Clause = {
     parse(clauseStr: string) {
         clauseStr += " "
         const tokens: Clause[] = []
@@ -51,7 +51,7 @@ const Clause = {
     }
 }
 
-class Terminal implements Clause {
+export class Terminal implements Clause {
     readonly str
     get id() {
         return this.str.startsWith("$")
@@ -83,7 +83,7 @@ class Terminal implements Clause {
     }
 }
 
-class NonTerminal implements Clause {
+export class NonTerminal implements Clause {
     data
     constructor(data: Clause[]) {
         this.data = data
@@ -108,7 +108,7 @@ class NonTerminal implements Clause {
 
 }
 
-class Rule {
+export class Rule {
     from
     to
     constructor(from: Clause, to: Clause) {
@@ -137,7 +137,7 @@ class Rule {
     }
 }
 
-class Program {
+export class Program {
     rules
     constructor(rules: Rule[]) {
         this.rules = rules
@@ -160,8 +160,8 @@ const p =
         ? Rule.parse(str)
         : Clause.parse(str)
 }
-const r = p as (input: string | TemplateStringsArray) => Rule
-const c = p as (input: string | TemplateStringsArray) => Clause
+export const r = p as (input: string | TemplateStringsArray) => Rule
+export const c = p as (input: string | TemplateStringsArray) => Clause
 
 console.log(r`a (b c) d = p`.toString())
 console.log(c`a`.unify(c`$e`))
