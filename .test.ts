@@ -7,7 +7,7 @@ import {
     c,
 } from "./mod.ts"
 
-const test =
+const apply =
 (rule: string | TemplateStringsArray) =>
 (clause: string | TemplateStringsArray) =>
 (expect: string | TemplateStringsArray) =>
@@ -19,7 +19,7 @@ const test =
     )
 
 Deno.test("basic rewriting", () => {
-    test
+    apply
         `double $x = $x $x`
         `double v`
         `(v v)`
