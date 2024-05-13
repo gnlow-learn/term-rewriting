@@ -141,6 +141,17 @@ class Rule {
     }
 }
 
-console.log(Rule.parse("a (b c) d = p").toString())
-console.log(Clause.parse("a").unify(Clause.parse("$e")))
-console.log(Rule.parse("double $x = $x plus $x").apply(Clause.parse("double k")).toString())
+const p =
+(input: string | TemplateStringsArray) => {
+    const str: string = Array.isArray(input) ? input[0] : input
+
+    return str.includes("=")
+        ? Rule.parse(str)
+        : Clause.parse(str)
+}
+const r = p as (input: string | TemplateStringsArray) => Rule
+const c = p as (input: string | TemplateStringsArray) => Clause
+
+console.log(r`a (b c) d = p`.toString())
+console.log(c`a`.unify(c`$e`))
+console.log(r`double $x = $x plus $x`.apply(c`double k`).toString())
