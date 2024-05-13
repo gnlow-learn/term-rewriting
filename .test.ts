@@ -3,9 +3,16 @@ import {
 
 } from "https://deno.land/std@0.224.0/assert/mod.ts"
 import {
+    p,
     r,
     c,
 } from "./mod.ts"
+
+const deTemplate =
+(str: string | TemplateStringsArray): string =>
+    Array.isArray(str)
+        ? str[0]
+        : str
 
 const apply =
 (rule: string | TemplateStringsArray) =>
@@ -13,9 +20,15 @@ const apply =
 (expect: string | TemplateStringsArray) =>
     assertEquals(
         r(rule).apply(c(clause)).toString(),
-        Array.isArray(expect)
-            ? expect[0]
-            : expect,
+        deTemplate(expect),
+    )
+
+const toString =
+(strable: string | TemplateStringsArray) =>
+(expect: string | TemplateStringsArray) =>
+    assertEquals(
+        p(strable).toString(),
+        deTemplate(expect),
     )
 
 Deno.test("basic rewriting", () => {
@@ -23,4 +36,9 @@ Deno.test("basic rewriting", () => {
         `double $x = $x $x`
         `double v`
         `(v v)`
+})
+Deno.test("toString", () => {
+    toString
+        `a (b)`
+        `(a b)`
 })

@@ -152,7 +152,7 @@ export class Program {
     }
 }
 
-const p =
+export const p =
 (input: string | TemplateStringsArray) => {
     const str: string = Array.isArray(input) ? input[0] : input
 
