@@ -8,24 +8,26 @@ import {
     c,
 } from "./mod.ts"
 
+type Str = string | TemplateStringsArray
+
 const deTemplate =
-(str: string | TemplateStringsArray): string =>
+(str: Str): string =>
     Array.isArray(str)
         ? str[0]
         : str
 
 const apply =
-(rule: string | TemplateStringsArray) =>
-(clause: string | TemplateStringsArray) =>
-(expect: string | TemplateStringsArray) =>
+(rule: Str) =>
+(clause: Str) =>
+(expect: Str) =>
     assertEquals(
         r(rule).apply(c(clause)).toString(),
         deTemplate(expect),
     )
 
 const toString =
-(strable: string | TemplateStringsArray) =>
-(expect: string | TemplateStringsArray) =>
+(strable: Str) =>
+(expect: Str) =>
     assertEquals(
         p(strable).toString(),
         deTemplate(expect),
