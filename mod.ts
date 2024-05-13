@@ -1,6 +1,4 @@
-const rules = [
-    `eq $a $b = eq $b $a`,
-]
+type Knowledge = Record<string, Clause>
 
 const zip =
 <T extends unknown[]>
@@ -18,7 +16,8 @@ const zip =
 
 interface Clause {
     data: Clause[]
-    unify(target: Clause): false | Record<string, Clause>
+    unify(target: Clause): false | Knowledge
+    apply(knowledge: Knowledge): Clause
     toString(): string
 }
 
@@ -65,13 +64,18 @@ class Terminal implements Clause {
     constructor(str: string) {
         this.str = str
     }
-    unify(target: Clause): false | Record<string, Clause> {
+    unify(target: Clause): false | Knowledge {
         return this.id
             ? { [this.id]: target }
             : target instanceof Terminal
                 ? (this.str == target.str) && {}
                     || target.unify(this)
                 : false
+    }
+    apply(knowledge: Knowledge): Clause {
+        return this.id
+            && knowledge[this.id]
+            || this
     }
     toString() {
         return this.str
@@ -84,12 +88,17 @@ class NonTerminal implements Clause {
         this.data = data
     }
     unify(target: Clause) {
-        const vars: Record<string, Clause> = {}
+        const vars: Knowledge = {}
         return zip(this.data, target.data)
             .every(([me, you]) => {
                 const u = you.unify(me)
                 return u && Object.assign(vars, u)
             }) && vars
+    }
+    apply(knowledge: Knowledge) {
+        return new NonTerminal(
+            this.data.map(x => x.apply(knowledge))
+        )
     }
     toString(): string {
         return this.data.map(x => {
@@ -114,7 +123,7 @@ class Rule {
         const u = this.from.unify(clause)
         if (!u) return u
 
-        
+        return this.to.apply(u)
     }
     toString() {
         return `${
