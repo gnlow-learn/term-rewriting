@@ -33,7 +33,7 @@ const Clause = {
             }
         }
         for (let i=0; i<clauseStr.length; i++) {
-            if (/[a-zA-Z0-9$]/.test(clauseStr[i])) {
+            if (/[a-zA-Z0-9$+]/.test(clauseStr[i])) {
                 token += clauseStr[i]
                 continue
             } else if (clauseStr[i] == "(") {
@@ -89,6 +89,7 @@ class NonTerminal implements Clause {
         this.data = data
     }
     unify(target: Clause) {
+        console.log("unify:", this.toString() + ",", target.toString())
         const vars: Knowledge = {}
         return zip(this.data, target.data)
             .every(([me, you]) => {
@@ -167,7 +168,9 @@ console.log(c`a`.unify(c`$e`))
 console.log(r`double $x = $x plus $x`.apply(c`double k`).toString())
 
 const rules = new Program(`
-    1 = n 0
-    2 = n 1
+    1 = S 0
+    2 = S 1
+    $m + 0 = $m
+    $m + (S $n) = S ($m + $n)
 `.trim().split("\n").map(r))
 console.log(rules.query(c`2`).toString())
