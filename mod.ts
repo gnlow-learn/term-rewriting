@@ -102,7 +102,7 @@ class NonTerminal implements Clause {
     }
     toString(): string {
         return this.data.map(x => {
-            if (x instanceof NonTerminal) {
+            if (x instanceof Terminal) {
                 return x.toString()
             } else {
                 return `(${x.toString()})`
