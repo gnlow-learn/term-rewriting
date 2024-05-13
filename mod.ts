@@ -65,12 +65,13 @@ class Terminal implements Clause {
         this.str = str
     }
     unify(target: Clause): false | Knowledge {
+        console.log("unify:", this.toString() + ",", target.toString())
         return this.id
             ? { [this.id]: target }
             : target instanceof Terminal
                 ? (this.str == target.str) && {}
-                    || target.unify(this)
-                : false
+                    || !!target.id && target.unify(this)
+                : target.unify(this)
     }
     apply(knowledge: Knowledge): Clause {
         return this.id
@@ -101,13 +102,7 @@ class NonTerminal implements Clause {
         )
     }
     toString(): string {
-        return this.data.map(x => {
-            if (x instanceof Terminal) {
-                return x.toString()
-            } else {
-                return `(${x.toString()})`
-            }
-        }).join(" ")
+        return "(" + this.data.map(x =>  x.toString()).join(" ") + ")"
     }
 
 }
@@ -115,11 +110,11 @@ class NonTerminal implements Clause {
 class Rule {
     from
     to
-    constructor(from: NonTerminal, to: NonTerminal) {
+    constructor(from: Clause, to: Clause) {
         this.from = from
         this.to = to
     }
-    apply(clause: NonTerminal) {
+    apply(clause: Clause) {
         const u = this.from.unify(clause)
         if (!u) return u
 
@@ -147,7 +142,12 @@ class Program {
         this.rules = rules
     }
     query(query: Clause) {
-        
+        while (true) {
+            const rule = this.rules.find(rule => rule.apply(query))
+            if (!rule) break
+            query = rule.apply(query) as NonTerminal
+        }
+        return query
     }
 }
 
@@ -165,3 +165,9 @@ const c = p as (input: string | TemplateStringsArray) => Clause
 console.log(r`a (b c) d = p`.toString())
 console.log(c`a`.unify(c`$e`))
 console.log(r`double $x = $x plus $x`.apply(c`double k`).toString())
+
+const rules = new Program(`
+    1 = n 0
+    2 = n 1
+`.trim().split("\n").map(r))
+console.log(rules.query(c`2`).toString())
