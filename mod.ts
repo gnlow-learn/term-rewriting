@@ -143,4 +143,4 @@ class Rule {
 
 console.log(Rule.parse("a (b c) d = p").toString())
 console.log(Clause.parse("a").unify(Clause.parse("$e")))
-console.log(Rule.parse("a = b").apply(Clause.parse("a")))
+console.log(Rule.parse("double $x = $x plus $x").apply(Clause.parse("double k")).toString())
