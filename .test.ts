@@ -44,17 +44,9 @@ Deno.test("toString", () => {
         `a (b)`
         `(a b)`
 })
-/*
 Deno.test("partial rewrite", () => {
     apply
         `1 = p 0`
         `p 1`
         `(p (p 0))`
-})
-*/
-Deno.test("find", () => {
-    assertEquals(
-        c`a (b c)`.find(c`b c`)?.toString(),
-        "(b c)",
-    )
 })

@@ -18,7 +18,7 @@ export interface Clause {
     data: Clause[]
     unify(target: Clause): false | Knowledge
     apply(knowledge: Knowledge): Clause
-    find(target: Clause): undefined | Clause
+    replace(target: Clause, f: (result: Clause) => Clause): Clause
     toString(): string
 }
 
@@ -79,8 +79,8 @@ export class Terminal implements Clause {
             && knowledge[this.id]
             || this
     }
-    find(target: Clause) {
-        return this.unify(target) ? this : undefined
+    replace(target: Clause, f: (result: Clause) => Clause): Clause {
+        return this.unify(target) ? f(this) : this
     }
     toString() {
         return this.str
@@ -107,8 +107,8 @@ export class NonTerminal implements Clause {
             this.data.map(x => x.apply(knowledge))
         )
     }
-    find(target: Clause) {
-        return this.unify(target) ? this : this.data.find(x => x.find(target))
+    replace(target: Clause, f: (result: Clause) => Clause): Clause {
+        return this.unify(target) ? f(this) : new NonTerminal(this.data.map(x => x.replace(target, f)))
     }
     toString(): string {
         return "(" + this.data.map(x =>  x.toString()).join(" ") + ")"
@@ -124,10 +124,12 @@ export class Rule {
         this.to = to
     }
     apply(clause: Clause) {
-        const u = this.from.unify(clause)
-        if (!u) return u
-
-        return this.to.apply(u)
+        return clause.replace(this.from, result => {
+            console.log("  find:", result.toString(), "\n  apply:", this.toString())
+            const v = this.to.apply(this.from.unify(result) || {})
+            console.log("  result:", v.toString())
+            return v
+        })
     }
     toString() {
         return `${
