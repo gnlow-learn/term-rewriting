@@ -18,6 +18,7 @@ export interface Clause {
     data: Clause[]
     unify(target: Clause): false | Knowledge
     apply(knowledge: Knowledge): Clause
+    find(target: Clause): undefined | Clause
     toString(): string
 }
 
@@ -78,6 +79,9 @@ export class Terminal implements Clause {
             && knowledge[this.id]
             || this
     }
+    find(target: Clause) {
+        return this.unify(target) ? this : undefined
+    }
     toString() {
         return this.str
     }
@@ -93,6 +97,7 @@ export class NonTerminal implements Clause {
         const vars: Knowledge = {}
         return zip(this.data, target.data)
             .every(([me, you]) => {
+                if (!me || !you) return false
                 const u = you.unify(me)
                 return u && Object.assign(vars, u)
             }) && vars
@@ -101,6 +106,9 @@ export class NonTerminal implements Clause {
         return new NonTerminal(
             this.data.map(x => x.apply(knowledge))
         )
+    }
+    find(target: Clause) {
+        return this.unify(target) ? this : this.data.find(x => x.find(target))
     }
     toString(): string {
         return "(" + this.data.map(x =>  x.toString()).join(" ") + ")"
