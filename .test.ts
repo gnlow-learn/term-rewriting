@@ -3,7 +3,7 @@ import {
 
 } from "https://deno.land/std@0.224.0/assert/mod.ts"
 import {
-    p,
+    parse,
     r,
     c,
 } from "./mod.ts"
@@ -29,7 +29,7 @@ const toString =
 (strable: Str) =>
 (expect: Str) =>
     assertEquals(
-        p(strable).toString(),
+        parse(strable).toString(),
         deTemplate(expect),
     )
 
@@ -49,4 +49,21 @@ Deno.test("partial rewrite", () => {
         `1 = p 0`
         `p 1`
         `(p (p 0))`
+})
+Deno.test("peano", () => {
+    apply
+        `
+            1 = p 0
+            2 = p 1
+        `
+        `2`
+        `(p (p 0))`
+    apply
+        `
+            1 = p 0
+            2 = p 1
+            $a + (p $b) = p ($a + $b)
+        `
+        `2 + 1`
+        `(p (p (p 0)))`
 })

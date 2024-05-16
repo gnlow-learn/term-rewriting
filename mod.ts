@@ -152,23 +152,33 @@ export class Program {
     constructor(rules: Rule[]) {
         this.rules = rules
     }
-    query(query: Clause) {
+    apply(query: Clause) {
         while (true) {
-            const rule = this.rules.find(rule => rule.apply(query))
+            const rule = this.rules.find(rule => rule.apply(query).toString() != query.toString())
             if (!rule) break
             query = rule.apply(query) as NonTerminal
         }
         return query
     }
+    
+    static parse(programStr: string) {
+        return new Program(programStr.trim().split("\n").map(Rule.parse))
+    }
 }
 
-export const p =
+export const parse =
 (input: string | TemplateStringsArray) => {
     const str: string = Array.isArray(input) ? input[0] : input
+    const eqs = [...str].filter(x => x == "=").length
 
-    return str.includes("=")
-        ? Rule.parse(str)
-        : Clause.parse(str)
+    return (
+        eqs > 1
+            ? Program
+        : eqs == 1
+            ? Rule
+            : Clause
+    ).parse(str)
 }
-export const r = p as (input: string | TemplateStringsArray) => Rule
-export const c = p as (input: string | TemplateStringsArray) => Clause
+export const r = parse as (input: string | TemplateStringsArray) => Rule
+export const c = parse as (input: string | TemplateStringsArray) => Clause
+export const p = parse as (input: string | TemplateStringsArray) => Program
