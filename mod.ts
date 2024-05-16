@@ -93,9 +93,9 @@ export class Terminal implements Clause {
     constructor(str: string) {
         this.str = str
     }
-    @log(ret => console.log("  ->", Knowledge.show(ret || {})))
+    //@log(ret => console.log("  ->", Knowledge.show(ret || {})))
     unify(target: Clause): false | Knowledge {
-        console.log("unify:", this.toString() + ",", target.toString())
+        //console.log("unify:", this.toString() + ",", target.toString())
         return this.id
             ? { [this.id]: target }
             : target instanceof Terminal
@@ -116,14 +116,28 @@ export class Terminal implements Clause {
     }
 }
 
+const safeAssign =
+(target: Knowledge, source: Knowledge) => {
+    if (
+        Object.entries(target)
+        .some(([k, v]) =>
+            source[k]
+            && v.toString() != source[k].toString()
+        )
+    ) {
+        return false
+    }
+    return Object.assign(target, source)
+}
+
 export class NonTerminal implements Clause {
     data
     constructor(data: Clause[]) {
         this.data = data
     }
-    @log(ret => console.log("  ->", Knowledge.show(ret || {})))
+    //@log(ret => console.log("  ->", Knowledge.show(ret || {})))
     unify(target: Clause): false | Knowledge {
-        console.log("unify:", this.toString() + ",", target.toString())
+        //console.log("unify:", this.toString() + ",", target.toString())
         if (target instanceof Terminal && target.id) {
             return target.unify(this)
         }
@@ -132,7 +146,7 @@ export class NonTerminal implements Clause {
             .every(([me, you]) => {
                 if (!me || !you) return false
                 const u = you.unify(me)
-                return u && Object.assign(vars, u)
+                return u && safeAssign(vars, u)
             }) && vars
     }
     apply(knowledge: Knowledge) {
@@ -191,9 +205,9 @@ export class Program {
             if (!rule) break
             console.log(
                 "app",
-                "\n    " + query.toString().substring(0, 20),
+                "\n    " + query.toString().substring(0, 40),
                 "\n    " + rule.toString(),
-                "\n    " + "-".repeat(20),
+                "\n    " + "-".repeat(40),
                 "\n    " + rule.apply(query).toString()
             )
             query = rule.apply(query) as NonTerminal

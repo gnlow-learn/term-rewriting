@@ -66,3 +66,13 @@ Deno.test("math", () => {
         `1 / (sqrt 2)`
         `(2 ^ ((2 ^ (- 1)) * (- 1)))`
 })
+Deno.test("var", () => {
+    apply
+        `$v $v = double $v`
+        `v v`
+        `(double v)`
+    apply
+        `$v $v = double $v`
+        `x y`
+        `(x y)`
+})
