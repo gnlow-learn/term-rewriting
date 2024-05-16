@@ -39,7 +39,12 @@ export const Clause = {
                 continue
             } else if (clauseStr[i] == "(") {
                 let inner = ""
-                for (i++; clauseStr[i] != ")"; i++) {
+                for (
+                    i++;
+                    i<clauseStr.length
+                    && clauseStr[i] != ")";
+                    i++
+                ) {
                     inner += clauseStr[i]
                 }
                 tokens.push(Clause.parse(inner))
@@ -66,7 +71,7 @@ export class Terminal implements Clause {
         this.str = str
     }
     unify(target: Clause): false | Knowledge {
-        console.log("unify:", this.toString() + ",", target.toString())
+        //console.log("unify:", this.toString() + ",", target.toString())
         return this.id
             ? { [this.id]: target }
             : target instanceof Terminal
@@ -93,7 +98,7 @@ export class NonTerminal implements Clause {
         this.data = data
     }
     unify(target: Clause) {
-        console.log("unify:", this.toString() + ",", target.toString())
+        //console.log("unify:", this.toString() + ",", target.toString())
         const vars: Knowledge = {}
         return zip(this.data, target.data)
             .every(([me, you]) => {
@@ -125,9 +130,9 @@ export class Rule {
     }
     apply(clause: Clause) {
         return clause.replace(this.from, result => {
-            console.log("  find:", result.toString(), "\n  apply:", this.toString())
+            //console.log("  find:", result.toString(), "\n  apply:", this.toString())
             const v = this.to.apply(this.from.unify(result) || {})
-            console.log("  result:", v.toString())
+            //console.log("  result:", v.toString())
             return v
         })
     }
@@ -156,11 +161,20 @@ export class Program {
         while (true) {
             const rule = this.rules.find(rule => rule.apply(query).toString() != query.toString())
             if (!rule) break
+            console.log(
+                "app",
+                "\n    " + query.toString().substring(0, 20),
+                "\n    " + rule.toString(),
+                "\n    " + "-".repeat(20),
+                "\n    " + rule.apply(query).toString()
+            )
             query = rule.apply(query) as NonTerminal
         }
         return query
     }
-    
+    toString() {
+        return this.rules.map(rule => rule.toString()).join("\n")
+    }
     static parse(programStr: string) {
         return new Program(programStr.trim().split("\n").map(Rule.parse))
     }
