@@ -1,5 +1,19 @@
 export type Knowledge = Record<string, Clause>
 
+const log =
+<This, Args extends unknown[], Return>
+(f: (ret: Return) => void) =>
+(
+    target: (this: This, ...args: Args) => Return,
+    _context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>
+) => {
+    return function(this: This, ...args: Args) {
+        const v = target.call(this, ...args)
+        f(v)
+        return v
+    }
+}
+
 export const zip =
 <T extends unknown[]>
 (...arrs: {[K in keyof T]: T[K][]}): T[] => {
@@ -12,6 +26,15 @@ export const zip =
         result.push(arrs.map(x => x[i]) as T)
     }
     return result
+}
+
+export const Knowledge = {
+    show(knowledge: Knowledge) {
+        return Object.fromEntries(
+            Object.entries(knowledge)
+            .map(([k, v]) => [k, v.toString()])
+        )
+    }
 }
 
 export interface Clause {
@@ -70,8 +93,9 @@ export class Terminal implements Clause {
     constructor(str: string) {
         this.str = str
     }
+    @log(ret => console.log("  ->", Knowledge.show(ret || {})))
     unify(target: Clause): false | Knowledge {
-        //console.log("unify:", this.toString() + ",", target.toString())
+        console.log("unify:", this.toString() + ",", target.toString())
         return this.id
             ? { [this.id]: target }
             : target instanceof Terminal
@@ -97,8 +121,12 @@ export class NonTerminal implements Clause {
     constructor(data: Clause[]) {
         this.data = data
     }
-    unify(target: Clause) {
-        //console.log("unify:", this.toString() + ",", target.toString())
+    @log(ret => console.log("  ->", Knowledge.show(ret || {})))
+    unify(target: Clause): false | Knowledge {
+        console.log("unify:", this.toString() + ",", target.toString())
+        if (target instanceof Terminal && target.id) {
+            return target.unify(this)
+        }
         const vars: Knowledge = {}
         return zip(this.data, target.data)
             .every(([me, you]) => {

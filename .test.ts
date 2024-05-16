@@ -35,11 +35,8 @@ Deno.test("peano", () => {
     apply
         `
             $a + (p $b) = p ($a + $b)
+            $a + 0 = $a
         `
         `((p (p 0)) + (p 0))`
         `(p (p (p 0)))`
 })
-
-/*
-            $a + (p $b) = p ($a + $b)
-            */
